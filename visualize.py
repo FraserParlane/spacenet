@@ -13,17 +13,18 @@ class GeoTIFF:
 
     def __post_init__(self):
         self.gdata: osgeo.gdal.Dataset = gdal.Open(self.path)
-
         self._read_bands()
 
     def _read_bands(self):
         """Read in the band data."""
         self.n_bands = self.gdata.RasterCount
+        self.x_res = self.gdata.RasterXSize
+        self.y_res = self.gdata.RasterYSize
         self.bands = np.zeros(
             (
-                self.gdata.RasterCount,
-                self.gdata.RasterXSize,
-                self.gdata.RasterYSize,
+                self.n_bands,
+                self.x_res,
+                self.y_res,
             )
         )
         for i in range(self.n_bands):
@@ -33,7 +34,7 @@ class GeoTIFF:
     def plot_band(self, n=0):
 
         plt.figure()
-        plt.imshow(self.bands[n])
+        plt.imshow(self.bands)
         plt.show()
 
 
@@ -49,6 +50,21 @@ class PSRGB(GeoTIFF):
     """GeoTIFF files containing PSRGB data."""
     def __post_init__(self):
         super().__post_init__()
+        self._proc_rgb()
+
+    def _proc_rgb(self):
+        """Reshape and normalize RGB data."""
+        self.rgb = np.zeros(
+            (
+                self.x_res,
+                self.y_res,
+                self.n_bands,
+            )
+        )
+        for i in range(self.n_bands):
+            self.rgb[:, :, i] = self.bands[i]
+
+
 
 
 def run():
@@ -57,9 +73,11 @@ def run():
     pan = PSRGB(
         path=psrgb_path
     )
-    print(pan.bands)
-    pan.plot_band()
 
+    plt.figure()
+    print(pan.rgb.shape)
+    plt.imshow(pan.rgb)
+    plt.show()
 
 if __name__ == '__main__':
     run()
