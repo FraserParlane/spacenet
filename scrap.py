@@ -56,6 +56,39 @@ class PAN(GeoTIFF):
 #     plt.show()
 
 
+
+def stretch(bands, lower_percent=1, higher_percent=98):
+    np.ma.array(bands, mask=np.isnan(bands))
+    out = np.zeros_like(bands)
+    a = 0
+    b = 255
+    c = np.percentile(bands, lower_percent)
+    d = np.percentile(bands, higher_percent)
+    t = a + (bands - c) * (b - a) / (d - c)
+    t[t<a] = a
+    t[t>b] = b
+    out = t
+    return out.astype(np.uint8)
+
+
+def band_correction(
+        bands: np.ndarray,
+        lower_percent: float = 1,
+        upper_percent: float = 98,
+) -> np.ndarray:
+
+    out = np.zeros_like(bands)
+    a = 0
+    b = 255
+    c = np.percentile(bands, lower_percent)
+    d = np.percentile(bands, upper_percent)
+    t = a + (bands - c) * (b - a) / (d - c)
+    t[t < a] = a
+    t[t > b] = b
+    out = t
+    return out.astype(np.uint8)
+
+
 def run():
     # Just use greyscale pan? What is MS?
 
@@ -66,7 +99,7 @@ def run():
     # folder = 'AOI_3_Paris/PS-RGB'
     # for file in tqdm(os.listdir(folder)):
     #     if file.endswith('.tif'):
-    #         p = PanRGB(path=f'{folder}/{file}')
+    #         p = PanRGB(tif_path=f'{folder}/{file}')
     #         val = min(val, p.rgb.min())
     # print(val)
 
