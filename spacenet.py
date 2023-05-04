@@ -1,7 +1,9 @@
+"""
+An example of processing geospatial data from SpaceNet with the GDAL library.
+"""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
-from typing import Optional
 from osgeo import gdal
 from tqdm import tqdm
 import numpy as np
@@ -17,7 +19,7 @@ class GeoTIFF(ABC):
     def __post_init__(self):
 
         # Load data
-        self.gdata: osgeo.gdal.Dataset = gdal.Open(self.path)
+        self.gdata: gdal.Dataset = gdal.Open(self.path)
 
         # Extract some basic metadata about the bands
         self.n_bands = self.gdata.RasterCount
@@ -51,6 +53,7 @@ class GeoTIFF(ABC):
 
     @abstractmethod
     def plot_bands(self, ax: plt.Axes):
+        """Plot RGB bands."""
         pass
 
 
@@ -92,6 +95,7 @@ class PSRGB(GeoTIFF):
 
 @dataclass(kw_only=True)
 class GeoJSON:
+    """A helper dataclass for processing .geojson files."""
     path: str
 
     def __post_init__(self):
@@ -108,43 +112,12 @@ class GeoJSON:
             try:
                 x, y = np.array(road['geometry']['coordinates']).T
                 ax.plot(x, y, color='white', lw=0.5, solid_capstyle='round')
-            except:
+            except ValueError:
                 pass  # TODO catch and plot multi-path roads.
 
 
-def experiment():
-    pan_path = 'AOI_3_Paris/PAN/SN3_roads_train_AOI_3_Paris_PAN_img100.tif'
-    psrgb_path = 'AOI_3_Paris/PS-RGB/SN3_roads_train_AOI_3_Paris_PS-RGB_img100.tif'
-    json_path = 'AOI_3_Paris/geojson_roads/SN3_roads_train_AOI_3_Paris_geojson_roads_img100.geojson'
-
-    geotiff = PAN(
-        path=pan_path,
-    )
-
-    geojson = GeoJSON(
-        path=json_path
-    )
-
-    # Make figure objects
-    figure: plt.Figure = plt.figure()
-    ax: plt.Axes = figure.add_subplot()
-
-    # Plot bands
-    geotiff.plot_bands(ax=ax)
-
-    # Plot roads
-    geojson.plot_roads(ax=ax)
-
-    # Format
-    # Not meaningful. Should be scaled based on latitude
-    ax.set_aspect('equal')
-    ax.set_xlabel('Longitude')
-    ax.set_ylabel('Latitude')
-    figure.set_dpi(300)
-    figure.savefig('roads.png')
-
-
 def plot_spacenet():
+    """Plot all .tiff and .geojson files in one figure."""
 
     # Make figure objects
     figure: plt.Figure = plt.figure(

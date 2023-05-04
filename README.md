@@ -5,7 +5,7 @@ This repo is a demonstration of visualizing data, both tif and geojson, from [Sp
 ![](patches_low-res.png)
 
 ## Installation
-Note that the GDAL installation instructions are for Mac OSX. Install GDAL libraries threw brew prior to installing GDAL pip package.
+Note that the GDAL installation instructions are for Mac OSX. Install GDAL libraries with [Homebrew](https://brew.sh/) prior to installing GDAL pip package.
 
 `brew install GDAL`
 
