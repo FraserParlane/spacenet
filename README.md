@@ -1,11 +1,15 @@
 # SpaceNet visualization with GDAL
 
-This repo is a demonstration of visualizing data, both tif and geojson, from [SpaceNet](https://spacenet.ai) with the [GDAL](https://gdal.org/python) library. Note that some regions of the map are blank because the data provided by SpaceNet is for an ML training challenge. 
+This is a demonstration of visualizing geospatial data, both geoTIFF and geoJSON, provided by [SpaceNet](https://spacenet.ai) with the [GDAL](https://gdal.org/python) library.
+
+Note that some regions of the map below are blank because the data provided by SpaceNet is for an ML training challenge. 
 
 ![](patches_low-res.png)
 
 ## Installation
-Note that the GDAL installation instructions are for Mac OSX. Install GDAL libraries with [Homebrew](https://brew.sh/) prior to installing GDAL pip package.
+These GDAL installation instructions are for Mac OSX.
+
+Install GDAL libraries with [Homebrew](https://brew.sh/) prior to installing GDAL pip package.
 
 `brew install GDAL`
 
@@ -31,6 +35,6 @@ Expand the archives.
 `tar -xf SN3_roads_train_AOI_3_Paris.tar.gz` \
 `tar -xf SN2_buildings_train_AOI_3_Paris.tar.gz`
 
-# Run
+## Run
 
 The data processing and plotting code can be found in `spacent.py`.

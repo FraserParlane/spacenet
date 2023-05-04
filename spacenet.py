@@ -1,5 +1,6 @@
 """
 An example of processing geospatial data from SpaceNet with the GDAL library.
+Fraser Parlane 20230504
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -13,7 +14,7 @@ import os
 
 @dataclass(kw_only=True)
 class GeoTIFF(ABC):
-    """Base class for GeoTIFF files."""
+    """Base class for GeoTIFF (both PAN and PAN-sharpened RGB files.)"""
     path: str
 
     def __post_init__(self):
@@ -33,12 +34,13 @@ class GeoTIFF(ABC):
         self._read_bands()
 
     def _proc_geotransform(self):
+        """Determine the bounds of the data in lat/lon."""
 
         # See https://gdal.org/tutorials/geotransforms_tut.html
         self.extent = np.zeros(4)
         gt = self.gdata.GetGeoTransform()
 
-        # Left, right, bottom, top
+        # Order of: left, right, bottom, top
         self.extent[0] = gt[0]
         self.extent[1] = gt[0] + self.x_res * gt[1] + self.y_res * gt[2]
         self.extent[2] = gt[3] + self.x_res * gt[4] + self.y_res * gt[5]
@@ -53,7 +55,7 @@ class GeoTIFF(ABC):
 
     @abstractmethod
     def plot_bands(self, ax: plt.Axes):
-        """Plot RGB bands."""
+        """Plot bands. This method must be defined in child classes."""
         pass
 
 
@@ -77,6 +79,8 @@ class PSRGB(GeoTIFF):
 
     def _proc_rgb(self):
         """Reshape and normalize RGB data."""
+
+        # Define a place to store RGB data.
         self.rgb = np.zeros((self.x_res, self.y_res, self.n_bands))
 
         # Transform array
@@ -90,7 +94,7 @@ class PSRGB(GeoTIFF):
 
     def plot_bands(self, ax: plt.Axes):
         # TODO implement.
-        pass
+        raise NotImplementedError
 
 
 @dataclass(kw_only=True)
@@ -100,20 +104,25 @@ class GeoJSON:
 
     def __post_init__(self):
 
-        # Load json
+        # Load geojson data.
         with open(self.path, 'r') as f:
             self.json = json.load(f)
 
     def plot_roads(self, ax: plt.Axes) -> None:
-        """Plot JSON roads on axes."""
+        """Plot JSON roads on provided axes."""
 
         # Plot each road
         for road in self.json['features']:
             try:
                 x, y = np.array(road['geometry']['coordinates']).T
                 ax.plot(x, y, color='white', lw=0.5, solid_capstyle='round')
+
             except ValueError:
-                pass  # TODO catch and plot multi-path roads.
+                # Note: some roads contain multiple paths, which means the
+                # conversion to a numpy array throws errors. In the future,
+                # become robust to this. Consider not converting to a numpy
+                # array.
+                pass
 
 
 def plot_spacenet():
@@ -126,7 +135,7 @@ def plot_spacenet():
     )
     ax: plt.Axes = figure.add_subplot()
 
-    # Define the plotting bounds
+    # Define the plotting bounds. These will be iteratively updated.
     x_min = np.inf
     x_max = -np.inf
     y_min = np.inf
@@ -158,16 +167,18 @@ def plot_spacenet():
         # Plot bands
         tif.plot_bands(ax=ax)
 
-        # Update bounds
+        # Update plotting bounds
         x_min = min(x_min, tif.extent[0])
         x_max = max(x_max, tif.extent[1])
         y_min = min(y_min, tif.extent[2])
         y_max = max(y_max, tif.extent[3])
 
-        # Cleanup
+        # Cleanup. Python occasionally is throwing a memory-related error,
+        # though the error is sporadic. It is possible that the below command
+        # solves this error.
         del tif
 
-    # Plot roads
+    # for each geojson / road file
     for path in tqdm(json_paths):
 
         # Read data
@@ -176,7 +187,7 @@ def plot_spacenet():
         # Plot roads
         gj.plot_roads(ax=ax)
 
-    # Format and save
+    # Format the figure and save to disk.
     ax.set_title('SpaceNet PAN band for Paris, France (with road overlay)')
     ax.set_facecolor('black')
     ax.set_xlim(x_min, x_max)
@@ -187,5 +198,4 @@ def plot_spacenet():
 
 
 if __name__ == '__main__':
-    # experiment()
     plot_spacenet()
