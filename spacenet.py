@@ -85,6 +85,10 @@ class PSRGB(GeoTIFF):
         rgb_max = np.max(self.rgb, axis=(0, 1))
         self.rgb = (self.rgb - rgb_min) / (rgb_max - rgb_min)
 
+    def plot_bands(self, ax: plt.Axes):
+        # TODO implement.
+        pass
+
 
 @dataclass(kw_only=True)
 class GeoJSON:
@@ -105,7 +109,7 @@ class GeoJSON:
                 x, y = np.array(road['geometry']['coordinates']).T
                 ax.plot(x, y, color='white', lw=0.5, solid_capstyle='round')
             except:
-                print('a')
+                pass  # TODO catch and plot multi-path roads.
 
 
 def experiment():
@@ -144,8 +148,8 @@ def plot_spacenet():
 
     # Make figure objects
     figure: plt.Figure = plt.figure(
-        figsize=(10, 8),
-        dpi=1000,
+        figsize=(8, 6),
+        dpi=300,
     )
     ax: plt.Axes = figure.add_subplot()
 
@@ -173,7 +177,7 @@ def plot_spacenet():
         json_paths.append(f'{folder_json}/{file}')
 
     # Plot bands
-    for path in tqdm(tif_paths[:50]):
+    for path in tqdm(tif_paths):
 
         # Read data
         tif = PAN(path=path)
@@ -200,11 +204,13 @@ def plot_spacenet():
         gj.plot_roads(ax=ax)
 
     # Format and save
+    ax.set_title('SpaceNet PAN band for Paris, France (with road overlay)')
+    ax.set_facecolor('black')
     ax.set_xlim(x_min, x_max)
     ax.set_ylim(y_min, y_max)
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
-    figure.savefig('patches.png')
+    figure.savefig('patches_low-res.png')
 
 
 if __name__ == '__main__':
