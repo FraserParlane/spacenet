@@ -1,6 +1,6 @@
 # SpaceNet visualization with GDAL
 
-This repo is a demonstration of visualizing data, both tif and geojson, from [SpaceNet](https://spacenet.ai) with the [GDAL](https://gdal.org/python) library.
+This repo is a demonstration of visualizing data, both tif and geojson, from [SpaceNet](https://spacenet.ai) with the [GDAL](https://gdal.org/python) library. Note that some regions of the map are blank because the data provided by SpaceNet is for an ML training challenge. 
 
 ![](patches_low-res.png)
 
