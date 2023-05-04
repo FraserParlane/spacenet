@@ -99,7 +99,7 @@ def run():
     # folder = 'AOI_3_Paris/PS-RGB'
     # for file in tqdm(os.listdir(folder)):
     #     if file.endswith('.tif'):
-    #         p = PanRGB(tif_path=f'{folder}/{file}')
+    #         p = PanRGB(path=f'{folder}/{file}')
     #         val = min(val, p.rgb.min())
     # print(val)
 
