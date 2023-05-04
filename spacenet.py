@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
 from typing import Optional
@@ -9,7 +10,7 @@ import os
 
 
 @dataclass(kw_only=True)
-class GeoTIFF:
+class GeoTIFF(ABC):
     """Base class for GeoTIFF files."""
     tif_path: str
     json_path: Optional[str] = None
@@ -63,6 +64,10 @@ class GeoTIFF:
         if self.json_path is not None:
             self.gj = GeoJSON(path=self.json_path)
 
+    @abstractmethod
+    def plot_bands(self, ax: plt.Axes):
+        pass
+
     def plot_roads(
             self,
             ax: plt.Axes,
@@ -75,7 +80,7 @@ class GeoTIFF:
             ax.plot(
                 x,
                 y,
-                color='blue',
+                color='white',
                 lw=2,
             )
 
@@ -85,6 +90,16 @@ class PAN(GeoTIFF):
     """GeoTIFF files containing PAN data."""
     def __post_init__(self):
         super().__post_init__()
+
+    def plot_bands(
+            self,
+            ax: plt.Axes,
+    ):
+        """Plot PAN data."""
+        ax.imshow(
+            self.bands[0],
+            extent=self.extent,
+        )
 
 
 @dataclass(kw_only=True)
@@ -127,22 +142,29 @@ class GeoJSON:
 
 
 
-def run():
-    # pan_path = 'AOI_3_Paris/PAN/SN3_roads_train_AOI_3_Paris_PAN_img100.tif'
-    # tif = PAN(tif_path=pan_path)
-
-    tif_path = 'AOI_3_Paris/PS-RGB/SN3_roads_train_AOI_3_Paris_PS-RGB_img100.tif'
+def experiment():
+    pan_path = 'AOI_3_Paris/PAN/SN3_roads_train_AOI_3_Paris_PAN_img100.tif'
+    psrgb_path = 'AOI_3_Paris/PS-RGB/SN3_roads_train_AOI_3_Paris_PS-RGB_img100.tif'
     json_path = 'AOI_3_Paris/geojson_roads/SN3_roads_train_AOI_3_Paris_geojson_roads_img100.geojson'
-    geo = PSRGB(
-        tif_path=tif_path,
+
+    geo = PAN(
+        tif_path=pan_path,
         json_path=json_path,
     )
+
+    # geo = PSRGB(
+    #     tif_path=psrgb_path,
+    #     json_path=json_path,
+    # )
 
     # Make figure objects
     figure: plt.Figure = plt.figure()
     ax: plt.Axes = figure.add_subplot()
 
-    # Plot
+    # Plot bands
+    geo.plot_bands(ax=ax)
+
+    # Plot roads
     geo.plot_roads(ax=ax)
 
     # Format
@@ -153,7 +175,7 @@ def run():
 
 
 
-def patches():
+def plot_spacenet():
 
     # Make figure objects
     figure: plt.Figure = plt.figure(
@@ -201,4 +223,4 @@ def patches():
 
 
 if __name__ == '__main__':
-    run()
+    experiment()
