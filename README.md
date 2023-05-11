@@ -37,4 +37,4 @@ Expand the archives.
 
 ## Run
 
-The data processing and plotting code can be found in `spacent.py`.
+The data processing and plotting code can be found in `spacenet.py`.
